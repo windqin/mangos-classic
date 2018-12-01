@@ -1217,10 +1217,13 @@ void Pet::InitStatsForLevel(uint32 petlevel)
     SetAttackTime(OFF_ATTACK, cInfo->MeleeBaseAttackTime);
     SetAttackTime(RANGED_ATTACK, cInfo->RangedBaseAttackTime);
 
-    if (getPetType() == HUNTER_PET)
-        SetMeleeDamageSchool(SpellSchools(SPELL_SCHOOL_NORMAL));
-    else
-    {
+// NON_VANILLA: do not reset hunter pet damage school back to normal
+// which means Lupos will still do shadow damage after tamed
+// also the resistance will be kept, for example Snarler in Feralas
+//    if (getPetType() == HUNTER_PET)
+//        SetMeleeDamageSchool(SpellSchools(SPELL_SCHOOL_NORMAL));
+//    else
+//    {
         SetMeleeDamageSchool(SpellSchools(cInfo->DamageSchool));
 
         createResistance[SPELL_SCHOOL_HOLY]   = cInfo->ResistanceHoly;
@@ -1229,7 +1232,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
         createResistance[SPELL_SCHOOL_FROST]  = cInfo->ResistanceFrost;
         createResistance[SPELL_SCHOOL_SHADOW] = cInfo->ResistanceShadow;
         createResistance[SPELL_SCHOOL_ARCANE] = cInfo->ResistanceArcane;
-    }
+//    }
 
     for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
         SetModifierValue(UnitMods(UNIT_MOD_RESISTANCE_START + i), BASE_VALUE, float(createResistance[i]));
