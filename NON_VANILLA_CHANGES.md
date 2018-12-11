@@ -1,6 +1,6 @@
 # Global
 ## Item
-TODO
+- All "file shield" type items (for example "Essence of the Pure Flame") now enjoy spell bonus damange. The formula is: final_damage = base_damage + spell_bonus_damage * (base_damage / 100).
 ## Environment
 
 

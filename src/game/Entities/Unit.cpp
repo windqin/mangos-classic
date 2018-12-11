@@ -1912,6 +1912,12 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
 
                     uint32 damage = (*i)->GetModifier()->m_amount;
 
+					// NON_VANILLA: enjoy spell damage bonus
+					uint32 spellId = (*i)->GetId();
+					SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+					uint32 afterBonusDamage = (*i)->GetCaster()->SpellDamageBonusDone(pVictim, spellInfo, damage, SPELL_DIRECT_DAMAGE);
+					damage += afterBonusDamage * (damage / 60.0f);
+
                     // Calculate absorb resist ??? no data in opcode for this possibly unable to absorb or resist?
                     // uint32 absorb;
                     // uint32 resist;
