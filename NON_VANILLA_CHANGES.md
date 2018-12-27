@@ -1,6 +1,8 @@
 # Global
 ## Item
 - All "file shield" type items (for example "Essence of the Pure Flame") now enjoy spell bonus damange. The formula is: final_damage = base_damage + spell_bonus_damage * (base_damage / 100).
+- Teebu's Blazing Longsword: damage type change to Fire
+
 ## Environment
 
 
