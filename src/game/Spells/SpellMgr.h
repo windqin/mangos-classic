@@ -150,6 +150,7 @@ inline bool IsDestinationOnlyEffect(SpellEntry const* spellInfo, SpellEffectInde
         case SPELL_EFFECT_PERSISTENT_AREA_AURA:
         case SPELL_EFFECT_TRANS_DOOR:
         case SPELL_EFFECT_SUMMON:
+        case SPELL_EFFECT_SUMMON_WILD:
         case SPELL_EFFECT_SUMMON_DEAD_PET:
         case SPELL_EFFECT_SUMMON_OBJECT_SLOT1:
         case SPELL_EFFECT_SUMMON_OBJECT_SLOT2:
@@ -214,6 +215,19 @@ inline bool IsSpellLastAuraEffect(SpellEntry const* spellInfo, SpellEffectIndex 
         if (spellInfo->EffectApplyAuraName[i])
             return false;
     return true;
+}
+
+inline bool IsAuraRemoveOnStacking(SpellEntry const* spellInfo, int32 effIdx) // TODO: extend to all effects
+{
+    switch (spellInfo->EffectApplyAuraName[effIdx])
+    {
+        case SPELL_AURA_MOD_INCREASE_ENERGY:
+        case SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT:
+        case SPELL_AURA_MOD_INCREASE_HEALTH:
+            return false;
+        default:
+            return true;
+    }
 }
 
 inline bool IsAllowingDeadTarget(SpellEntry const* spellInfo)
@@ -328,6 +342,18 @@ inline bool IsAutocastable(uint32 spellId)
     return IsAutocastable(spellInfo);
 }
 
+// TODO: Unify with creature_template_spells so that we can set both attack and pet bar visibility
+// If true, only gives access to spellbar, and not states and commands
+// Works in connection with AI-CanHandleCharm
+inline bool IsPossessCharmType(uint32 spellId)
+{
+    switch (spellId)
+    {
+        case 999999: // compilation warning suppression
+        default: return false;
+    }
+}
+
 inline bool IsDeathOnlySpell(SpellEntry const* spellInfo)
 {
     return spellInfo->HasAttribute(SPELL_ATTR_EX3_CAST_ON_DEAD) || spellInfo->Id == 2584;
@@ -363,8 +389,11 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
 
     switch (spellInfo->Id)
     {
-        case 22856:         // Ice Lock (Guard Slip'kik ice trap in Dire Maul)
+        case 9460:          // Corrosive Ooze
+        case 17327:         // Spirit Particles
         case 22735:         // Spirit of Runn Tum
+        case 22856:         // Ice Lock (Guard Slip'kik ice trap in Dire Maul)
+        case 28126:         // Spirit Particles (purple)
             return false;
         default:
             return true;
@@ -739,6 +768,10 @@ inline bool IsPositiveEffectTargetMode(const SpellEntry* entry, SpellEffectIndex
     if (!entry)
         return false;
 
+    // Forces positive targets to be negative TODO: Find out if this is true for neutral targets
+    if (entry->HasAttribute(SPELL_ATTR_NEGATIVE))
+        return false;
+
     // Triggered spells case: prefer child spell via IsPositiveSpell()-like scan for triggered spell
     if (IsSpellEffectTriggerSpell(entry, effIndex))
     {
@@ -1088,7 +1121,7 @@ inline bool IsIgnoreLosSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex
         default: break;
     }
 
-    return spellInfo->EffectRadiusIndex[effIdx] == 13 || IsIgnoreLosSpell(spellInfo);
+    return spellInfo->EffectRadiusIndex[effIdx] == 28 || IsIgnoreLosSpell(spellInfo);
 }
 
 inline bool IsIgnoreLosSpellCast(SpellEntry const* spellInfo)
@@ -1743,6 +1776,12 @@ struct SpellTargetPosition
     float  target_Y;
     float  target_Z;
     float  target_Orientation;
+};
+
+struct SpellCone
+{
+    uint32 spellId;
+    int32 coneAngle;
 };
 
 typedef std::unordered_map<uint32, SpellTargetPosition> SpellTargetPositionMap;

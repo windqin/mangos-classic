@@ -3441,6 +3441,24 @@ bool ChatHandler::HandleGetDistanceCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleGetLosCommand(char* args)
+{
+    Player* player = m_session->GetPlayer();
+    Unit* target = getSelectedUnit();
+    if (!target)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return false;
+    }
+
+    float x, y, z;
+    target->GetPosition(x, y, z);
+    bool normalLos = player->IsWithinLOS(x, y, z, false);
+    bool m2Los = player->IsWithinLOS(x, y, z, true);
+    PSendSysMessage("Los check: Normal: %s M2: %s", normalLos ? "true" : "false", m2Los ? "true" : "false");
+    return true;
+}
+
 bool ChatHandler::HandleDieCommand(char* args)
 {
     Player* player = m_session->GetPlayer();
@@ -3827,7 +3845,7 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
         curRespawnDelay = 0;
     std::string curRespawnDelayStr = secsToTimeString(curRespawnDelay, true);
     std::string defRespawnDelayStr = secsToTimeString(target->GetRespawnDelay(), true);
-    std::string curCorpseDecayStr = secsToTimeString(time_t(target->GetCorpseDecayTimer() / IN_MILLISECONDS), true);
+    std::string curCorpseDecayStr = secsToTimeString(std::chrono::system_clock::to_time_t(target->GetCorpseDecayTimer()), true);
 
     PSendSysMessage(LANG_NPCINFO_CHAR, target->GetGuidStr().c_str(), faction, npcflags, Entry, displayid, nativeid);
     PSendSysMessage(LANG_NPCINFO_LEVEL, target->getLevel());
@@ -3872,8 +3890,8 @@ bool ChatHandler::HandleNpcThreatCommand(char* /*args*/)
         Unit* pUnit = itr->getTarget();
 
         if (pUnit)
-            // Player |cffff0000%s|r [GUID: %u] has |cffff0000%f|r threat and taunt state %u
-            PSendSysMessage(LANG_NPC_THREAT_PLAYER, pUnit->GetName(), pUnit->GetGUIDLow(), target->getThreatManager().getThreat(pUnit), itr->GetTauntState());
+            // Player |cffff0000%s|r [GUID: %u] has |cffff0000%f|r threat, taunt state %u and hostile state %u
+            PSendSysMessage(LANG_NPC_THREAT_PLAYER, pUnit->GetName(), pUnit->GetGUIDLow(), target->getThreatManager().getThreat(pUnit), itr->GetTauntState(), itr->GetHostileState());
     }
 
     return true;

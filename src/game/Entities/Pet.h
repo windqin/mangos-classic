@@ -284,10 +284,6 @@ class Pet : public Creature
         uint32  m_resetTalentsCost;
         time_t  m_resetTalentsTime;
 
-        const uint64& GetAuraUpdateMask() const { return m_auraUpdateMask; }
-        void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (uint64(1) << slot); }
-        void ResetAuraUpdateMask() { m_auraUpdateMask = 0; }
-
         // overwrite Creature function for name localization back to WorldObject version without localization
         const char* GetNameForLocaleIdx(int32 locale_idx) const { return WorldObject::GetNameForLocaleIdx(locale_idx); }
 
@@ -305,8 +301,6 @@ class Pet : public Creature
 
         virtual CombatData* GetCombatData() override { return m_combatData; }
 
-        void InitTamedPetPassives(Unit* player);
-
         virtual void RegenerateHealth() override;
 
     protected:
@@ -316,7 +310,6 @@ class Pet : public Creature
         int32   m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
         int32   m_loyaltyPoints;
         int32   m_bonusdamage;
-        uint64  m_auraUpdateMask;
         bool    m_loading;
         uint32  m_xpRequiredForNextLoyaltyLevel;
 
